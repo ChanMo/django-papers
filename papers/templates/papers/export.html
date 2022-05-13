@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static utils_tags %}
+{% block html_class %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'backend/katex/katex.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'backend/css/editor.css' %}">  
+{% endblock %}
+{% block extra_js %}
+  {{props|json_script:"initial-props"}}
+  <script>
+   window.props = JSON.parse(document.getElementById('initial-props').textContent);
+
+  </script>
+  {% manifest_static "src/paperExport.jsx" %}
+{% endblock %}

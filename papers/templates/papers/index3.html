@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load utils_tags %}
+{% block extra_css %}
+<style>
+	@media print {
+		::-webkit-scrollbar {
+      	width: 0;
+     }
+	}
+  .tabs .is-active {
+     font-weight: bold;
+   }
+  .tabs li:not(.is-active) {
+     font-size: 0.85rem !important;
+   }
+  .tabs li:not(.is-active) a {
+     line-height: 2.7;
+   }
+</style>
+{% endblock %}
+{% block content %}
+<section class="section" >
+	<div class="container">
+		<div class='tabs is-medium'>
+			<ul>
+				<li ><a href="{% url 'orgs:papers:index' request.org.slug %}">自定义组卷</a></li>
+				<li class="is-active"><a href="">模板组卷</a></li>
+			</ul>
+		</div>
+		{% include "messages.html" %}
+		<div class="level" >
+			<div class="level-left" >
+				<div class="level-item" >
+					{% include "search_bar.html" %}
+				</div>
+			</div>
+			<div class="level-right" >
+				<div id="create-btn"></div>
+				{#<a class="level-item button is-primary" href="{% url 'papers:create' %}">创建试卷</a>#}
+			</div>
+		</div>
+		{% include "courses/category_filter.html" %}
+		{% if paginator.object_list %}
+		<div class="table-container" >
+			<table class="table is-fullwidth is-bordered is-hoverable" >
+				<thead>
+					<tr>
+						<th>标题</th>
+						<th>学科</th>
+						<th>创建人</th>
+						<th>最后修改时间</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for row in paginator.object_list %}
+					<tr>
+						<td>{{row.title}}</td>
+						<td>{{row.category}}</td>
+						<td>{{row.creator}}</td>
+						<td>{{row.updated_at}}</td>
+						<td>
+							<a class="button is-small is-light" href="{% url 'papers:look_paper' request.org.slug row.pk %}">预览</a>
+							<a class="button is-small is-info is-light" href="{% url 'orgs:papers:export' request.org.slug row.pk %}">导出</a>
+							<a class="button is-small is-info is-light" href="{% url 'papers:copys' row.pk request.org.slug %}">使用模板</a>
+							<!-- <a class="button is-small is-danger is-light" href="{% url 'orgs:papers:delete' request.org.slug row.pk %}">删除</a> -->
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		{% include "pagination.html" with page_obj=paginator %}
+		{% else %}
+		{% include "empty.html" %}
+		{% endif %}
+	</div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+	function myFunction(){
+		window.print()
+	}
+</script>
+{% endblock %}

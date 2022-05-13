@@ -1,0 +1,23 @@
+{% load static thumbnail %}
+<div class="card is-outlined is-shadowless is-clickable" onclick="javascript:window.location.href='{% url "papers:preview" row.pk %}'">
+  <div class="card-image is-clickable">
+    <figure class="image is-2by1">
+      {% if row.preview %}
+	{% thumbnail row.preview "480x240" crop="center" as im %}
+	<img src="{{im.url}}" />
+        {% endthumbnail %}
+      {% else %}
+	<img src="{% static "backend/img/empty.png" %}" />
+      {% endif %}
+    </figure>
+  </div>
+  <div class="card-content px-2 py-4">
+    <p class="is-size-6 has-text-dark mb-2">{{row.title}}</p>
+    <p class="is-size-7 has-text-grey" style="max-height:3.5rem;overflow:hidden;">{{row.description}}</p>
+    <p class="tags mt-3" >
+      {% for tag in row.tags.names %}
+	<span class="tag">{{tag}}</span>
+      {% endfor %}
+    </p>
+  </div>
+</div>

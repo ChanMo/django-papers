@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static thumbnail mptt_tags %}
+{% block extra_css %}
+  <style>
+   .is-nowrap {
+     white-space: nowrap;
+     overflow: hidden;
+   }
+  </style>
+{% endblock %}
+{% block navbar %}
+  {% include "navbar2.html" %}
+{% endblock %}
+{% block content %}
+  <section class="section" >
+    <div class="container">
+      <div class="columns">
+	<div class="column is-narrow is-hidden-mobile" style="width:200px">
+	  <aside class="menu" style="position:sticky;top:6.25rem;">
+	    <p class="menu-label" >学科</p>
+	    <ul class="menu-list" >
+	      {% for row in categories %}
+		<li><a {% if row.slug == category.slug %}class="" style="background:#eff5fb !important;"{% endif %} href="{% url "papers:category" row.slug %}">{{row.title}}</a></li>
+	      {% endfor %}
+	    </ul>
+	    {% comment %}
+	    <p class="menu-label" >年级</p>
+	    <ul class="menu-list">
+	    {% for grade in grades %}
+	    <li><a href="?grade={{grade.pk}}">{{grade}}</a></li>
+	    {% endfor %}
+	    </ul>
+	    {% endcomment %}
+	  </aside>
+	</div>
+	<div class="column" >
+	  <div class="level" >
+	    <div class="level-left" >
+	      <div class="level-item" >
+		{% block header_left %}
+		  <h1 class="title is-size-4" >试卷仓库</h1>
+		{% endblock %}
+	      </div>
+	    </div>
+	    <div class="level-right" >
+	      <div class="level-item" >
+		{#% include "search_bar.html" %#}
+		<div class="dropdown" id="search-result" >
+		  <div class="dropdown-trigger">
+		    <div class="field">
+		      <p class="control has-icons-right" >
+			<input id="search-input" type="search" class="input" placeholder="输入后按回车键搜索" />
+			<span class="icon is-small is-right" >
+			  <i data-feather="search"></i>
+			</span>
+		      </p>
+		    </div>
+		  </div>
+		  <div class="dropdown-menu" role="menu" >
+		    <div class="dropdown-content" style="max-height:200px;overflow:auto;">
+		    </div>
+		  </div>
+		</div>
+	      </div>
+	    </div>
+	  </div>
+
+	  {# tags #}
+	  {% comment %}
+	  <h4 class="title is-size-6 mb-3" >热门标签</h4>
+	  <div class="tags" >
+	  {% for tag in tags %}
+	  <a href="?tag={{tag.name}}" class="tag is-light is-{% cycle 'primary' 'warning' 'danger' 'info' 'link' %}">{{tag.name}}</a>
+	  {% endfor %}
+	  </div>
+	  {% endcomment %}
+
+	  {% block inner %}
+	  {% endblock %}
+
+	</div>
+      </div>
+  </section>
+{% endblock %}
+{% block extra_js %}
+  <script>
+   const searchEle = document.getElementById("search-input")
+   const resultEle = document.getElementById("search-result")
+   document.addEventListener("click", event => {
+     if(!event.target.closest(".dropdown")) {
+       searchEle.value = ''
+       resultEle.classList.remove("is-active")
+     }
+   })
+   searchEle.addEventListener("change", async(event) => {
+     resultEle.querySelector(".dropdown-content").innerHTML = ''
+     const value = event.target.value
+     const url = '/api/papers/?search=' + value
+     try {
+       const res = await fetch(url)
+       if (!res.ok) {
+	 throw res.status
+       }
+       const resJson = await res.json()
+       resultEle.classList.add("is-active")
+       let html = ''
+       if (resJson.count) {
+
+	 resJson.results.map(item => {
+	   const itemEle = document.createElement("a")
+	   itemEle.classList.add("dropdown-item")
+	   itemEle.setAttribute("href", `/papers/${item.id}/preview/`)
+	   itemEle.innerHTML = item.title
+	   resultEle.querySelector(".dropdown-content").appendChild(itemEle)
+	 })
+       } else {
+	 const empty = document.createElement("div")
+	 empty.classList.add("dropdown-item")
+	 empty.innerHTML = '什么也没找到, 试试其他关键字'
+	 resultEle.querySelector(".dropdown-content").appendChild(empty)
+       }
+     } catch(err) {
+       console.error(err)
+     }
+   })
+  </script>
+{% endblock %}

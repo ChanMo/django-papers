@@ -1,0 +1,20 @@
+{% extends "papers/base.html" %}
+{% block header_left %}
+  <nav class="breadcrumb" aria-label="breadcrumbs">
+    <ul>
+      <li><a href="{% url "papers:index" %}">试卷仓库</a></li>
+      <li class="is-active"><a href="#" aria-current="page">{{category.title}}</a></li>
+    </ul>
+  </nav>
+{% endblock %}
+{% block inner %}
+  <div class="columns is-multiline">
+    {% for row in page_obj.object_list %}
+      <div class="column is-one-third-tablet is-one-quarter-desktop">
+	{% include "papers/paper_card.html" %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% include "pagination.html" %}
+{% endblock %}

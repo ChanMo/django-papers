@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static utils_tags %}
+{% block html_class %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block extra_css %}
+  <style>
+   @media print {
+     ::-webkit-scrollbar {
+       width: 0;
+     }
+   }     
+  </style>
+  <link rel="stylesheet" type="text/css" href="{% static 'backend/katex/katex.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'backend/css/editor.css' %}">
+
+{% endblock %}
+{% block footer %}{% endblock %}
+{% block extra_js %}
+  {{object_json|json_script:"objectJson"}}
+  <script>
+   window.initialJson = JSON.parse(document.getElementById("objectJson").textContent)
+   window.org="{{ request.org.id }}"
+   window.orgSlug = '{{request.org.slug}}'
+   window.orgTitle="{{ request.org.title }}"
+  </script>
+  {% manifest_static "src/paper_look.jsx" %}
+{% endblock %}

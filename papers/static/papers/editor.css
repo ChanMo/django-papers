@@ -1,0 +1,36 @@
+:root {
+  --title-color: #363636;
+}
+.h1 {
+  font-size: 28px;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
+  display: block;
+}
+.h1 .public-DraftStyleDefault-block {
+}
+
+.h2 {
+  font-size: 18px;
+  margin-bottom: 0.5rem;
+  color: var(--title-color);
+  line-height: 1.5;
+  display: block;
+}
+
+.h3 {
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
+  display: block;
+}
+.unstyled {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.text-center {
+  text-align: center;
+}

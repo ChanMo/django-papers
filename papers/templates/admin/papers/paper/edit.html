@@ -1,0 +1,33 @@
+{% load static react_tags %}
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      {% block title %}{{title|default:"Demo Site"}}{% endblock %}
+    </title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" type="text/css" href="{% static 'papers/bulma.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'papers/katex.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'papers/editor.css' %}">
+
+    <style>
+      body {
+        margin: 0;
+      }
+     @media print {
+       ::-webkit-scrollbar {
+         width: 0;
+       }
+     }     
+    </style>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    {% include "react/react_props.html" %}
+    {% react_static "components/paper.jsx" %}
+  </body>
+</html>
