@@ -1,6 +1,8 @@
 /**
  * ImageBlock
  * editing: check is editing.
+ * TODO images list
+ * FIXME popperId
  */
 
 import React, { useState, useRef } from 'react'

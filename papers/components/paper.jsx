@@ -3,19 +3,59 @@ import ReactDOM from 'react-dom'
 import { Modifier, SelectionState, Editor, EditorState, RichUtils, convertToRaw, convertFromRaw, AtomicBlockUtils } from 'draft-js'
 import 'draft-js/dist/Draft.css'
 
+import ClickAwayListener from '@mui/material/ClickAwayListener'
+import Stack from '@mui/material/Stack'
+import IconButton from '@mui/material/IconButton'
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Popover from '@mui/material/Popover'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import Cookies from 'js-cookie'
+import { styled } from '@mui/material/styles';
+
+import FormatBoldIcon from '@mui/icons-material/FormatBold';
+import HighlightIcon from '@mui/icons-material/Highlight';
+import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+
 
 import Header from './Header'
 
 import { CustomBlock, customBlockStyleFn, decorator } from './utils'
 
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+  '& .MuiToggleButtonGroup-grouped': {
+    margin: theme.spacing(0.5),
+    border: 0,
+    '&.MuiToggleButton-root': {
+      color: 'white',
+      '&:hover': {
+        background: 'rgba(255,255,255,0.2)'
+      },
+      '&.Mui-selected': {
+        background: 'rgba(255,255,255,0.2)'
+      },
+    },
+    '&.Mui-disabled': {
+      border: 0,
+    },
+    '&:not(:first-of-type)': {
+      borderRadius: theme.shape.borderRadius,
+    },
+    '&:first-of-type': {
+      borderRadius: theme.shape.borderRadius,
+    },
+  },
+}));
+
+
 
 function App(props) {
   const [data, setData] = useState({})
+  //const [anchorEl, setAnchorEl] = useState(null)
   const [editorState, setEditorState] = useState(EditorState.createEmpty(decorator))
   const [readonly, setReadonly] = useState(false)
 
@@ -183,8 +223,54 @@ function App(props) {
     editorRef && editorRef.current && editorRef.current.focus()
   }
 
+
+  // current selection
+  const selection = editorState.getSelection()
+  const blockKey = selection.getStartKey()
+  const block = editorState.getCurrentContent().getBlockForKey(blockKey)
+  const blockType = block.getType()
+  const offset = selection.focusOffset
+
+
+  const popoverId = 'selection-popover'
+
+  const inlineStyle = editorState.getCurrentInlineStyle()
+
+  let anchorEl = undefined
+  if(!selection.isCollapsed() && window.getSelection().anchorNode) {
+    anchorEl = window.getSelection().anchorNode.parentNode
+  }
+  const popoverOpen = Boolean(anchorEl)
+
+  const handleToggleStyle2 = (value) => {
+    const res = RichUtils.toggleInlineStyle(editorState, value)
+    const selection = editorState.getSelection()
+    const emptySelection = selection.set('focusOffset', selection.anchorOffset)
+    const resWithoutSelection = EditorState.acceptSelection(res, emptySelection)
+    window.getSelection().removeAllRanges()
+    setEditorState(resWithoutSelection)
+
+    setReadonly(false)
+  }
+
+  useEffect(() => {
+    if(!editorState.getSelection().isCollapsed()) {
+      setReadonly(true)
+    }
+
+  }, [editorState, readonly])
+
+  const handleClickAway = () => {
+    const selection = editorState.getSelection()
+    const emptySelection = selection.set('focusOffset', selection.anchorOffset)
+    const resWithoutSelection = EditorState.acceptSelection(editorState, emptySelection)
+    window.getSelection().removeAllRanges()
+    setEditorState(resWithoutSelection)
+    setReadonly(false)
+  }
+
   return (
-    <>
+    <Box>
       <Header
         data={data}
         editorState={editorState}
@@ -193,6 +279,7 @@ function App(props) {
         onSave={handleSave}
         user={props.user}
       />
+      {/*}<ClickAwayListener onClickAway={handleClickAway}>*/}
       <Container maxWidth="md" sx={{mt:2}}>
         <Paper sx={{minHeight:'80vh',p:5,'@media print':{}}} 
           elevation={0}
@@ -210,7 +297,43 @@ function App(props) {
           />
         </Paper>
       </Container>
-    </>
+      {/*</ClickAwayListener>*/}
+      <Popover 
+        id={popoverId}
+        open={popoverOpen}
+        anchorEl={anchorEl}
+        //placement='top'
+        //sx={{zIndex:99}}
+        onClose={handleClickAway}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        sx={{transform:'translateY(-16px)'}}
+      >
+        <Stack spacing={0.5} direction="row" sx={{p:.5,bgcolor:'common.black','& .MuiIconButton-root':{color:'white',borderRadius:'4px','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}}>
+          <IconButton 
+            sx={{bgcolor:inlineStyle.includes('BOLD') ? 'rgba(255,255,255,0.2)':undefined}}
+            onClick={()=>handleToggleStyle2('BOLD')}>
+            <FormatBoldIcon fontSize="small" />
+          </IconButton>
+          <IconButton 
+            sx={{bgcolor:inlineStyle.includes('ITALIC') ? 'rgba(255,255,255,0.2)':undefined}}
+            onClick={()=>handleToggleStyle2('ITALIC')}>
+            <FormatItalicIcon fontSize="small" />
+          </IconButton>
+          <IconButton 
+            sx={{bgcolor:inlineStyle.includes('UNDERLINE') ? 'rgba(255,255,255,0.2)':undefined}}
+            onClick={()=>handleToggleStyle2('UNDERLINE')}>
+            <FormatUnderlinedIcon fontSize="small" />
+          </IconButton>
+        </Stack>
+      </Popover>
+    </Box>
   )
 }
 

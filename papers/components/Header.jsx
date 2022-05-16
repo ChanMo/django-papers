@@ -14,6 +14,7 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
 
+import HighlightIcon from '@mui/icons-material/Highlight';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -154,7 +155,7 @@ export default function PaperHeader(props) {
       </Toolbar>
       <Divider sx={{ '@media print': { display: 'none' } }} />
       <Toolbar variant="dense" 
-        sx={{minHeight:42, '& button': {mx: .5},'& hr': {mx: .5}}}
+        sx={{minHeight:42, '& .MuiButtonBase-root': {mx: .5,borderRadius:0.5},'& hr': {mx: .5}}}
       >
         <Tooltip title="撤销">
           <IconButton 
@@ -226,6 +227,12 @@ export default function PaperHeader(props) {
             color={inlineStyle.has('UNDERLINE') ? 'primary' : undefined}
             onClick={() => handleToggleStyle('UNDERLINE')}>
             <FormatUnderlinedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="高亮文本">
+          <IconButton
+            size="small">
+            <HighlightIcon />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
