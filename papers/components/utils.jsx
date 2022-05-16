@@ -153,7 +153,7 @@ export function CustomBlock(props) {
   //  blockProps.onRemove(block.getKey())
   //}
   if(type === 'IMG') {
-    return <ImageBlock data={value} />
+    return <ImageBlock data={value} onStartEdit={blockProps.onStartEdit} onCloseEdit={handleChange} />
   } else if(type === 'TABLE') {
     return <TableBlock data={value} onStartEdit={blockProps.onStartEdit} onCloseEdit={handleChange} />
   }

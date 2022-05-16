@@ -9,6 +9,7 @@
  */
 import React, { useState, useRef } from 'react'
 import { List } from 'immutable'
+import Paper from '@mui/material/Paper'
 import Fade from '@mui/material/Fade'
 import Popper from '@mui/material/Popper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
@@ -39,7 +40,6 @@ export default function TableExport(props) {
   }
 
   const handleSave = () => {
-    console.log('tesitng')
     setReadonly(true)
     setActive('')
     setAnchorEl(null)
@@ -237,6 +237,7 @@ export default function TableExport(props) {
       >
         {({TransitionProps}) => (
         <Fade {...TransitionProps} timeout={350}>
+          <Paper elevation={0} sx={{overflow:'hidden'}}>
         <Stack direction={groupType === 'col' ? 'row' : 'column'}
           sx={{bgcolor:'common.black','&>button':{borderRadius:0},'& > button:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}>
           <Tooltip title="删除">
@@ -245,6 +246,7 @@ export default function TableExport(props) {
             </IconButton>
           </Tooltip>
         </Stack>
+      </Paper>
       </Fade>
         )}
       </Popper>
