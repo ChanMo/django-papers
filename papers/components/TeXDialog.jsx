@@ -9,6 +9,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
+import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import TeXTemplate from './TeXTemplate'
 import TeXBlock from './TeXBlock'
@@ -97,6 +98,17 @@ export default function TeXDialog(props) {
         </Grid>
       </DialogContent>
       <DialogActions>
+        <Box sx={{flex:1,px:2}}>
+          <Link 
+            target="_blank"
+            rel="noopener"
+            variant="body2" 
+            href="#"
+            color="textSecondary"
+            sx={{}}
+          >了解如何使用TeX公式
+          </Link>
+        </Box>
         <Button color="inherit" onClick={onClose}>取消</Button>
         <Button 
           onClick={handleSave} 
