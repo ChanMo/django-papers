@@ -45,6 +45,16 @@ export const uploadImage = async(event) => {
   return
 }
 
+function TeXBlockWrap(props) {
+  const {content} = props.contentState.getEntity(props.entityKey).getData();
+  return (
+    <span>
+      <TeXBlock value={content} />
+      {props.children}
+    </span>
+  )
+}
+
 /*
  * custom decorator for draft editor
  * include latexBlock
@@ -52,7 +62,7 @@ export const uploadImage = async(event) => {
 export const decorator = new CompositeDecorator([
   {
     strategy: findTeXEntities,
-    component: TeXBlock,
+    component: TeXBlockWrap,
     //}, {
   //  strategy: findImage,
   //  component: InlineImageBlock,
