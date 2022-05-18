@@ -29,7 +29,7 @@ import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import Header from './Header'
 import TeXDialog from './TeXDialog'
 
-import { block2Inline, CustomBlock, customBlockStyleFn, decorator } from './utils'
+import { inline2Block, block2Inline, CustomBlock, customBlockStyleFn, decorator } from './utils'
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   '& .MuiToggleButtonGroup-grouped': {
@@ -376,6 +376,15 @@ function App(props) {
     setEntityKey(null)
   }
 
+  const handleSet2Block = () => {
+    const res = inline2Block(editorState)
+    setEditorState(res)
+    window.getSelection().removeAllRanges()
+    setEntityKey(null)
+    setAnchorEl(null)
+    setReadonly(false)
+  }
+
   const activeEntity = entityKey ? editorState.getCurrentContent().getEntity(entityKey) : null
   const selectionType = activeEntity ? activeEntity.getType() : 'PARAGRAPH'
 
@@ -423,16 +432,16 @@ function App(props) {
             vertical: 'top',
             horizontal: 'center'
           }}
-            transformOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center'
-            }}
-              sx={{transform:'translateY(-16px)'}}
-            >
+          transformOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center'
+          }}
+          sx={{transform:'translateY(-16px)'}}
+        >
               <Stack spacing={0.5} direction="row" sx={{p:.5,bgcolor:'common.black','& .MuiIconButton-root':{color:'white',borderRadius:'4px','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}}>
                 {selectionType === "IMG" && (
                   <>
-                    <IconButton>
+                    <IconButton onClick={handleSet2Block}>
                       <ChangeCircleOutlinedIcon fontSize="small" />
                     </IconButton>
                     <IconButton onClick={()=>handleEditEntity('img')}>

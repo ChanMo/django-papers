@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { SelectionState, CompositeDecorator, Editor, EditorState, convertToRaw, convertFromRaw, Modifier } from 'draft-js'
+import { AtomicBlockUtils, SelectionState, CompositeDecorator, Editor, EditorState, convertToRaw, convertFromRaw, Modifier } from 'draft-js'
 import ImageBlock from './ImageBlock'
 import TeXBlock from './TeXBlock'
 import TableBlock from './TableBlock'
@@ -195,6 +195,31 @@ export function CustomBlock(props) {
   return null
 }
 
+
+/**
+ * Inline Entity to Block
+ */
+export function inline2Block(editorState) {
+  const selection = editorState.getSelection()
+  const blockKey = selection.getStartKey()
+  const block = editorState.getCurrentContent().getBlockForKey(blockKey)
+  const offset = selection.focusOffset
+  const entity = block.getEntityAt(offset - 1)
+  const range = new SelectionState({
+    anchorKey: blockKey,
+    anchorOffset: offset-1,
+    focusKey: blockKey,
+    focusOffset: offset
+  })
+  const withoutInline = Modifier.removeRange(editorState.getCurrentContent(), range, 'backward')
+  const newState = EditorState.push(editorState, withoutInline, 'remove-range')
+  const res = AtomicBlockUtils.insertAtomicBlock(
+    newState,
+    entity,
+    ' '
+  )
+  return res
+}
 
 /**
  * Block Entity to Inline Entity
