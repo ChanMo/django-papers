@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Cookies from 'js-cookie'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import { CompositeDecorator, Editor, EditorState, convertToRaw, convertFromRaw, Modifier } from 'draft-js'
+import { SelectionState, CompositeDecorator, Editor, EditorState, convertToRaw, convertFromRaw, Modifier } from 'draft-js'
 import ImageBlock from './ImageBlock'
 import TeXBlock from './TeXBlock'
 import TableBlock from './TableBlock'
@@ -45,11 +45,28 @@ export const uploadImage = async(event) => {
   return
 }
 
+function InlineImageBlock(props) {
+  const data = props.contentState.getEntity(props.entityKey).getData();
+  const handleClick = (event) => {
+    const s = window.getSelection()
+    s.selectAllChildren(event.target.nextElementSibling)
+  }
+  return (
+    <span className="inline-entity">
+      <Box component="img" src={data.src} sx={{display:'inline-block',maxHeight:200,verticalAlign:'middle'}} onClick={handleClick} />
+      {props.children}
+    </span>
+  )
+}
 function TeXBlockWrap(props) {
   const {content} = props.contentState.getEntity(props.entityKey).getData();
+  const handleClick = (event) => {
+    const s = window.getSelection()
+    s.selectAllChildren(event.currentTarget.nextElementSibling)
+  }
   return (
-    <span>
-      <TeXBlock value={content} />
+    <span className="inline-entity">
+      <TeXBlock value={content} onClick={handleClick} />
       {props.children}
     </span>
   )
@@ -63,9 +80,9 @@ export const decorator = new CompositeDecorator([
   {
     strategy: findTeXEntities,
     component: TeXBlockWrap,
-    //}, {
-  //  strategy: findImage,
-  //  component: InlineImageBlock,
+  }, {
+    strategy: findImage,
+    component: InlineImageBlock,
   }
 ])
 
@@ -163,10 +180,71 @@ export function CustomBlock(props) {
   //  blockProps.onRemove(block.getKey())
   //}
   if(type === 'IMG') {
-    return <ImageBlock data={value} onStartEdit={blockProps.onStartEdit} onCloseEdit={handleChange} />
+    return (
+      <ImageBlock 
+        data={value} 
+        onStartEdit={blockProps.onStartEdit} 
+        onCloseEdit={handleChange}
+        onSet2Inline={()=>blockProps.onSet2Inline(block.getKey())}
+      />
+    )
   } else if(type === 'TABLE') {
     return <TableBlock data={value} onStartEdit={blockProps.onStartEdit} onCloseEdit={handleChange} />
   }
 
   return null
+}
+
+
+/**
+ * Block Entity to Inline Entity
+ */
+export function block2Inline(editorState, blockKey) {
+  // getEntityAt
+  const content = editorState.getCurrentContent()
+  const block = content.getBlockForKey(blockKey)
+  const entityKey = block.getEntityAt(0)
+
+  const targetRange = new SelectionState({
+    anchorKey: blockKey,
+    anchorOffset: 0,
+    focusKey: blockKey,
+    focusOffset: block.getLength()
+  })
+  const withoutBlock = Modifier.removeRange(content, targetRange, 'backward')
+  const resetBlock = Modifier.setBlockType(
+    withoutBlock,
+    withoutBlock.getSelectionAfter(),
+    'unstyled'
+  )
+
+  const beforeBlock = resetBlock.getBlockBefore(blockKey)
+  //const selection = withoutBlock.getSelectionBefore()
+  const selection = new SelectionState({
+    anchorKey: beforeBlock.getKey(),
+    anchorOffset: beforeBlock.getLength(),
+    focusKey: beforeBlock.getKey(),
+    focusOffset: beforeBlock.getLength()
+  })
+  const firstBlank = Modifier.insertText(
+    resetBlock, selection, ' '
+  )
+  const withEntity = Modifier.insertText(
+    firstBlank,
+    selection,
+    ' ',
+    null,
+    entityKey,
+  )
+  const withBlank = Modifier.insertText(
+    withEntity,
+    selection,
+    ' '
+  )
+  const res = EditorState.push(
+    editorState,
+    withBlank,
+    'insert-characters'
+  )
+  return res
 }

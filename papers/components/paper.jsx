@@ -17,6 +17,8 @@ import Paper from '@mui/material/Paper'
 import Cookies from 'js-cookie'
 import { styled } from '@mui/material/styles';
 
+import UploadIcon from '@mui/icons-material/Upload';
+import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import HighlightIcon from '@mui/icons-material/Highlight';
@@ -27,7 +29,7 @@ import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import Header from './Header'
 import TeXDialog from './TeXDialog'
 
-import { CustomBlock, customBlockStyleFn, decorator } from './utils'
+import { block2Inline, CustomBlock, customBlockStyleFn, decorator } from './utils'
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   '& .MuiToggleButtonGroup-grouped': {
@@ -102,6 +104,10 @@ function App(props) {
               'change-block-data'
             )
           },
+          onSet2Inline: (blockKey) => {
+            setEditorState(block2Inline(editorState, blockKey))
+            setReadonly(false)
+          }
           //onMoveForward: (blockKey) => _moveForward(blockKey),
           //onMoveBackward: (blockKey) => _moveBackward(blockKey),
           //onRemove: (blockKey) => _removeBlock(blockKey)
@@ -259,23 +265,24 @@ function App(props) {
         if(entityKey) {
           setEntityKey(entityKey)
           node = s.anchorNode.parentNode.closest('[data-offset-key]').previousElementSibling
-          node.classList.add("is-active")
+          //node = s.anchorNode.parentNode.closest('.inline-entity')
+          node && node.classList.add("is-active")
         } else {
           node = s.anchorNode.parentNode.closest('[data-offset-key]')
         }
         setAnchorEl(node)
-      } else if(entityKey) {
-        //const node = s.anchorNode.parentNode.closest('[data-offset-key]').nextElementSibling
-        const node = s.anchorNode.parentNode.closest('.katex')
-        if(node) {
-          s.selectAllChildren(node)
-        }
-      } else if(block.getEntityAt(selection.anchorOffset - 1)) {
-        // if +1 will get entity
-        const node = s.anchorNode.parentNode.closest('.katex')
-        if(node) {
-          s.selectAllChildren(node)
-        }
+        //} else if(entityKey) {
+        //  //const node = s.anchorNode.parentNode.closest('[data-offset-key]').nextElementSibling
+        //  const node = s.anchorNode.parentNode.closest('.inline-entity')
+        //  if(node) {
+        //    s.selectAllChildren(node)
+        //  }
+        //  //} else if(block.getEntityAt(selection.anchorOffset - 1)) {
+        //  //  // if +1 will get entity
+        //  //  const node = s.anchorNode.parentNode.closest('.inline-entity')
+        //  //  if(node) {
+        //  //    s.selectAllChildren(node)
+        //  //  }
       }
     }
 
@@ -369,6 +376,9 @@ function App(props) {
     setEntityKey(null)
   }
 
+  const activeEntity = entityKey ? editorState.getCurrentContent().getEntity(entityKey) : null
+  const selectionType = activeEntity ? activeEntity.getType() : 'PARAGRAPH'
+
   return (
     <Box>
       <Header
@@ -382,8 +392,8 @@ function App(props) {
       {/*}<ClickAwayListener onClickAway={handleClickAway}>*/}
       <Container maxWidth="md" sx={{mt:2}}>
         <Paper sx={{
-            minHeight:'80vh',p:5,'@media print':{}
-          }} 
+          minHeight:'80vh',p:5,'@media print':{}
+        }} 
           elevation={0}
           //onClick={handleFocus} ERROR: atomic click
         >
@@ -402,57 +412,67 @@ function App(props) {
       {/*</ClickAwayListener>*/}
       {popoverOpen && (
 
-      <Popover 
-        id={popoverId}
-        open={popoverOpen}
-        anchorEl={anchorEl}
-        //placement='top'
-        //sx={{zIndex:99}}
-        onClose={handleClickAway}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center'
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center'
-        }}
-        sx={{transform:'translateY(-16px)'}}
-      >
-        <Stack spacing={0.5} direction="row" sx={{p:.5,bgcolor:'common.black','& .MuiIconButton-root':{color:'white',borderRadius:'4px','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}}>
-          {entityKey ? (
-            <IconButton onClick={()=>handleEditEntity('tex')}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          ) : (
-
-          <>
-          <IconButton 
-            sx={{bgcolor:inlineStyle.includes('BOLD') ? 'rgba(255,255,255,0.2)':undefined}}
-            onClick={()=>handleToggleStyle2('BOLD')}>
-            <FormatBoldIcon fontSize="small" />
-          </IconButton>
-          <IconButton 
-            sx={{bgcolor:inlineStyle.includes('ITALIC') ? 'rgba(255,255,255,0.2)':undefined}}
-            onClick={()=>handleToggleStyle2('ITALIC')}>
-            <FormatItalicIcon fontSize="small" />
-          </IconButton>
-          <IconButton 
-            sx={{bgcolor:inlineStyle.includes('UNDERLINE') ? 'rgba(255,255,255,0.2)':undefined}}
-            onClick={()=>handleToggleStyle2('UNDERLINE')}>
-            <FormatUnderlinedIcon fontSize="small" />
-          </IconButton>
-        </>
-          )}
-        </Stack>
-      </Popover>
+        <Popover 
+          id={popoverId}
+          open={popoverOpen}
+          anchorEl={anchorEl}
+          //placement='top'
+          //sx={{zIndex:99}}
+          onClose={handleClickAway}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'center'
+          }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center'
+            }}
+              sx={{transform:'translateY(-16px)'}}
+            >
+              <Stack spacing={0.5} direction="row" sx={{p:.5,bgcolor:'common.black','& .MuiIconButton-root':{color:'white',borderRadius:'4px','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}}>
+                {selectionType === "IMG" && (
+                  <>
+                    <IconButton>
+                      <ChangeCircleOutlinedIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton onClick={()=>handleEditEntity('img')}>
+                      <UploadIcon fontSize="small" />
+                    </IconButton>
+                  </>
+                )}
+                {selectionType === "TEX" && (
+                  <IconButton onClick={()=>handleEditEntity('tex')}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                )}
+                {selectionType === "PARAGRAPH" && (
+                  <>
+                    <IconButton 
+                      sx={{bgcolor:inlineStyle.includes('BOLD') ? 'rgba(255,255,255,0.2)':undefined}}
+                      onClick={()=>handleToggleStyle2('BOLD')}>
+                      <FormatBoldIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton 
+                      sx={{bgcolor:inlineStyle.includes('ITALIC') ? 'rgba(255,255,255,0.2)':undefined}}
+                      onClick={()=>handleToggleStyle2('ITALIC')}>
+                      <FormatItalicIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton 
+                      sx={{bgcolor:inlineStyle.includes('UNDERLINE') ? 'rgba(255,255,255,0.2)':undefined}}
+                      onClick={()=>handleToggleStyle2('UNDERLINE')}>
+                      <FormatUnderlinedIcon fontSize="small" />
+                    </IconButton>
+                  </>
+                )}
+              </Stack>
+            </Popover>
       )}
-      {entityKey && (
+      {selectionType === "TEX" && (
         <TeXDialog 
           open={open === 'tex'}
           onClose={handleClose}
           editorState={editorState}
-          initialValue={editorState.getCurrentContent().getEntity(entityKey).getData()}
+          initialValue={activeEntity.getData()}
           onChange={handleDialogChange}
         />
       )}

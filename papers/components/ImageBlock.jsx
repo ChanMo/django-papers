@@ -23,6 +23,8 @@ import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 import UploadIcon from '@mui/icons-material/Upload';
+import ChangeCircleOutlinedIcon from '@mui/icons-material/ChangeCircleOutlined';
+
 import { styled } from '@mui/material/styles';
 
 
@@ -156,6 +158,11 @@ export default function ImageBlock(props) {
             </StyledToggleButtonGroup>
             <Divider orientation="vertical" flexItem sx={{mx:0.5, my:1}} />
             <Box sx={{borderRadius:'4px',overflow:'hidden',mx:'4px'}}>
+              <ButtonBase 
+                onClick={props.onSet2Inline}
+                sx={{padding:'7px',color:'white','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}>
+                <ChangeCircleOutlinedIcon fontSize="small" />
+              </ButtonBase>
               <ButtonBase 
                 sx={{padding:'7px',color:'white','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}} 
                 component="label" 
