@@ -16,35 +16,42 @@ import TeXBlock from './TeXBlock'
 
 export default function TeXDialog(props) {
   const { open, onClose, editorState, onChange } = props
-  const [form, setForm] = useState({})
+  const [form, setForm] = useState(props.initialValue || {})
+  const isEdit = Boolean(props.initialValue)
 
   const handleSave = () => {
-    const content = editorState.getCurrentContent()
-    const selection = editorState.getSelection()
-    const entity = content.createEntity('TEX', 'IMMUTABLE', form)
-    const key = entity.getLastCreatedEntityKey()
+    if(isEdit) {
+      // update 
+      onChange(form)
+    } else {
+      // insert new entity
+      const content = editorState.getCurrentContent()
+      const selection = editorState.getSelection()
+      const entity = content.createEntity('TEX', 'IMMUTABLE', form)
+      const key = entity.getLastCreatedEntityKey()
 
-    // create selection for apply entity
-    const firstBlank = Modifier.insertText(
-      content, editorState.getSelection(), ' '
-    )
-    const withEntity = Modifier.insertText(
-      firstBlank,
-      selection,
-      ' ',
-      null,
-      key,
-    )
-    const withBlank = Modifier.insertText(
-      withEntity,
-      selection,
-      ' '
-    )
-    onChange(EditorState.push(
-      editorState,
-      withBlank,
-      'insert-characters'
-    ))
+      // create selection for apply entity
+      const firstBlank = Modifier.insertText(
+        content, editorState.getSelection(), ' '
+      )
+      const withEntity = Modifier.insertText(
+        firstBlank,
+        selection,
+        ' ',
+        null,
+        key,
+      )
+      const withBlank = Modifier.insertText(
+        withEntity,
+        selection,
+        ' '
+      )
+      onChange(EditorState.push(
+        editorState,
+        withBlank,
+        'insert-characters'
+      ))
+    }
   }
 
   // choose from template
@@ -112,7 +119,7 @@ export default function TeXDialog(props) {
         <Button color="inherit" onClick={onClose}>取消</Button>
         <Button 
           onClick={handleSave} 
-          disabled={formValid ? undefined : true}>插入</Button>
+          disabled={formValid ? undefined : true}>{isEdit ? '保存' : '插入'}</Button>
         </DialogActions>
       </Dialog>
   )

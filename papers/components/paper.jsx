@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Modifier, SelectionState, Editor, EditorState, RichUtils, convertToRaw, convertFromRaw, AtomicBlockUtils } from 'draft-js'
 import 'draft-js/dist/Draft.css'
+import './app.css'
 
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Stack from '@mui/material/Stack'
@@ -16,6 +17,7 @@ import Paper from '@mui/material/Paper'
 import Cookies from 'js-cookie'
 import { styled } from '@mui/material/styles';
 
+import EditIcon from '@mui/icons-material/Edit';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import HighlightIcon from '@mui/icons-material/Highlight';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
@@ -23,6 +25,7 @@ import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 
 
 import Header from './Header'
+import TeXDialog from './TeXDialog'
 
 import { CustomBlock, customBlockStyleFn, decorator } from './utils'
 
@@ -54,8 +57,10 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 
 
 function App(props) {
+  const [open, setOpen] = useState(false)
   const [data, setData] = useState({})
-  //const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorEl, setAnchorEl] = useState(null) // selection anchor
+  const [entityKey, setEntityKey] = useState(null) // selection entity key
   const [editorState, setEditorState] = useState(EditorState.createEmpty(decorator))
   const [readonly, setReadonly] = useState(false)
 
@@ -224,24 +229,97 @@ function App(props) {
   }
 
 
-  // current selection
-  const selection = editorState.getSelection()
-  const blockKey = selection.getStartKey()
-  const block = editorState.getCurrentContent().getBlockForKey(blockKey)
-  const blockType = block.getType()
-  const offset = selection.focusOffset
+  //// current selection
+  //const selection = editorState.getSelection()
+  //const blockKey = selection.getStartKey()
+  //const block = editorState.getCurrentContent().getBlockForKey(blockKey)
+  //const blockType = block.getType()
+  //const offset = selection.focusOffset
 
-
+  // popover
   const popoverId = 'selection-popover'
+  let popoverOpen = Boolean(anchorEl)
+
+
+  /**
+   * check selection
+   */
+  useEffect(() => {
+    const contentState = editorState.getCurrentContent()
+    const selection = editorState.getSelection()
+    const blockKey = selection.getStartKey()
+    const block = editorState.getCurrentContent().getBlockForKey(blockKey)
+
+    const s = window.getSelection()
+
+    if(s.anchorNode) {
+      const entityKey = block.getEntityAt(selection.anchorOffset)
+      if(!selection.isCollapsed()) {
+        let node
+        if(entityKey) {
+          setEntityKey(entityKey)
+          node = s.anchorNode.parentNode.closest('[data-offset-key]').previousElementSibling
+          node.classList.add("is-active")
+        } else {
+          node = s.anchorNode.parentNode.closest('[data-offset-key]')
+        }
+        setAnchorEl(node)
+      } else if(entityKey) {
+        //const node = s.anchorNode.parentNode.closest('[data-offset-key]').nextElementSibling
+        const node = s.anchorNode.parentNode.closest('.katex')
+        if(node) {
+          s.selectAllChildren(node)
+        }
+      } else if(block.getEntityAt(selection.anchorOffset - 1)) {
+        // if +1 will get entity
+        const node = s.anchorNode.parentNode.closest('.katex')
+        if(node) {
+          s.selectAllChildren(node)
+        }
+      }
+    }
+
+  },[editorState.getSelection()])
+
+  //// try find inline entity
+  //if(selection.isCollapsed()) {
+  //  console.log('tesing')
+  //  const entityKey = block.getEntityAt(selection.anchorOffset)
+  //  const s = window.getSelection()
+  //  if(entityKey && s.focusNode) {
+  //    console.log(entityKey)
+  //    //const contentState = editorState.getCurrentContent()
+  //    //const entity = contentState.getEntity(entityKey)
+  //    const node = s.focusNode.parentNode.closest('.MuiBox-root')
+  //    //console.log(node.childNodes[0])
+  //    //const node = s.focusNode.parentNode.parentNode
+  //    //s.extend(node.childNodes[0], 2)
+  //    //node.classList.add("is-active")
+  //    //const node = s.focusNode.parentNode
+  //    //const range = document.createRange()
+  //    //range.selectNode(node)
+  //    //s.addRange(range)
+  //    //
+  //    //console.log(s.toString())
+  //    //const entitySelection = selection.set('focusOffset', offset + 1)
+  //    //console.log(entitySelection.serialize())
+  //    //anchorEl = s.focusNode.parentNode
+  //    anchorEl = node
+  //    popoverOpen = true
+  //  }
+  //} else {
+  //  // normal selection
+  //  // selection styles
+  //  if(!selection.isCollapsed() && window.getSelection().anchorNode) {
+  //    anchorEl = window.getSelection().anchorNode.parentNode
+  //    popoverOpen = true
+  //  }
+  //}
 
   const inlineStyle = editorState.getCurrentInlineStyle()
+  //const popoverOpen = false //Boolean(anchorEl)
 
-  let anchorEl = undefined
-  if(!selection.isCollapsed() && window.getSelection().anchorNode) {
-    anchorEl = window.getSelection().anchorNode.parentNode
-  }
-  const popoverOpen = Boolean(anchorEl)
-
+  // handle popover inline
   const handleToggleStyle2 = (value) => {
     const res = RichUtils.toggleInlineStyle(editorState, value)
     const selection = editorState.getSelection()
@@ -253,20 +331,42 @@ function App(props) {
     setReadonly(false)
   }
 
+  const handleClose = () => {
+    setOpen(false)
+  }
+
   useEffect(() => {
     if(!editorState.getSelection().isCollapsed()) {
       setReadonly(true)
     }
+  }, [editorState.getSelection().isCollapsed()])
 
-  }, [editorState, readonly])
+  const handleEditEntity = (entityType) => {
+    setReadonly(true)
+    setOpen(entityType)
+  }
+  const handleDialogChange = (value) => {
+    setOpen(false)
+    const content = editorState.getCurrentContent()
+    const newState = EditorState.push(
+      editorState, 
+      content.replaceEntityData(entityKey, value),
+      'apply-entity'
+    )
+    setEditorState(newState)
+  }
 
   const handleClickAway = () => {
+    console.log('clear selection')
+    anchorEl && anchorEl.classList.remove("is-active")
     const selection = editorState.getSelection()
     const emptySelection = selection.set('focusOffset', selection.anchorOffset)
     const resWithoutSelection = EditorState.acceptSelection(editorState, emptySelection)
     window.getSelection().removeAllRanges()
     setEditorState(resWithoutSelection)
     setReadonly(false)
+    setAnchorEl(null)
+    setEntityKey(null)
   }
 
   return (
@@ -281,7 +381,9 @@ function App(props) {
       />
       {/*}<ClickAwayListener onClickAway={handleClickAway}>*/}
       <Container maxWidth="md" sx={{mt:2}}>
-        <Paper sx={{minHeight:'80vh',p:5,'@media print':{}}} 
+        <Paper sx={{
+            minHeight:'80vh',p:5,'@media print':{}
+          }} 
           elevation={0}
           //onClick={handleFocus} ERROR: atomic click
         >
@@ -298,6 +400,8 @@ function App(props) {
         </Paper>
       </Container>
       {/*</ClickAwayListener>*/}
+      {popoverOpen && (
+
       <Popover 
         id={popoverId}
         open={popoverOpen}
@@ -316,6 +420,13 @@ function App(props) {
         sx={{transform:'translateY(-16px)'}}
       >
         <Stack spacing={0.5} direction="row" sx={{p:.5,bgcolor:'common.black','& .MuiIconButton-root':{color:'white',borderRadius:'4px','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}}}>
+          {entityKey ? (
+            <IconButton onClick={()=>handleEditEntity('tex')}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          ) : (
+
+          <>
           <IconButton 
             sx={{bgcolor:inlineStyle.includes('BOLD') ? 'rgba(255,255,255,0.2)':undefined}}
             onClick={()=>handleToggleStyle2('BOLD')}>
@@ -331,8 +442,20 @@ function App(props) {
             onClick={()=>handleToggleStyle2('UNDERLINE')}>
             <FormatUnderlinedIcon fontSize="small" />
           </IconButton>
+        </>
+          )}
         </Stack>
       </Popover>
+      )}
+      {entityKey && (
+        <TeXDialog 
+          open={open === 'tex'}
+          onClose={handleClose}
+          editorState={editorState}
+          initialValue={editorState.getCurrentContent().getEntity(entityKey).getData()}
+          onChange={handleDialogChange}
+        />
+      )}
     </Box>
   )
 }

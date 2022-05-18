@@ -1,0 +1,14 @@
+/**
+::selection {
+  background: orange;
+}
+
+.is-active {
+  background: orange;
+}
+*/
+.DraftEditor-root .is-active {
+  outline: 2px solid;
+  outline-color: #1976d2;
+  #border-radius: 2px 
+}

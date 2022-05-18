@@ -9,12 +9,13 @@ export default function TeXBlock({value, ...props}) {
       katex.render(
         value,
         refContainer.current,
-        { displayMode: false },
+        { displayMode: false, throwOnError:false },
       );
     }
   }, [value])
   return (
     <Box 
+      component="span"
       ref={refContainer}
       sx={[{
         verticalAlign:'middle',

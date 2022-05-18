@@ -43,7 +43,7 @@ import { convertToRaw, SelectionState, Modifier, AtomicBlockUtils,EditorState, R
 
 export default function PaperHeader(props) {
   const {data, editorState, onToggleStyle, onChange, onSave, user} = props
-  const [open, setOpen] = useState('tex')
+  const [open, setOpen] = useState(false)
 
   const handleClose = () => {
     setOpen(false)
