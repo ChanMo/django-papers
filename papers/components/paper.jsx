@@ -6,6 +6,7 @@ import './app.css'
 
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Stack from '@mui/material/Stack'
+import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -264,25 +265,16 @@ function App(props) {
         let node
         if(entityKey) {
           setEntityKey(entityKey)
-          node = s.anchorNode.parentNode.closest('[data-offset-key]').previousElementSibling
+          node = s.anchorNode.parentNode.closest('[data-offset-key]').previousElementSibling.parentNode
           //node = s.anchorNode.parentNode.closest('.inline-entity')
-          node && node.classList.add("is-active")
+          if(node) {
+            node.classList.add("is-active")
+            //node.setAttribute("draggable", "true")
+          }
         } else {
           node = s.anchorNode.parentNode.closest('[data-offset-key]')
         }
         setAnchorEl(node)
-        //} else if(entityKey) {
-        //  //const node = s.anchorNode.parentNode.closest('[data-offset-key]').nextElementSibling
-        //  const node = s.anchorNode.parentNode.closest('.inline-entity')
-        //  if(node) {
-        //    s.selectAllChildren(node)
-        //  }
-        //  //} else if(block.getEntityAt(selection.anchorOffset - 1)) {
-        //  //  // if +1 will get entity
-        //  //  const node = s.anchorNode.parentNode.closest('.inline-entity')
-        //  //  if(node) {
-        //  //    s.selectAllChildren(node)
-        //  //  }
       }
     }
 
@@ -361,7 +353,47 @@ function App(props) {
       'apply-entity'
     )
     setEditorState(newState)
+    //handleClickAway()
   }
+
+  /**
+   * upload image
+   */
+  const handleUpload = async(event) => {
+    const file = event.target.files[0]
+    if (file.size > 1024 * 1024) {
+      alert('文件过大, 请重新选择')
+      return
+    }
+    const formData = new FormData()
+    formData.append('file', file)
+    const url = '/upload/'
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': Cookies.get('csrftoken')
+        },
+        body: formData
+      })
+      if(!res.ok) {
+        throw res.status
+      }
+      const resJson = await res.json()
+      //setForm({...form, src:resJson['path']})
+      const content = editorState.getCurrentContent()
+      const newState = EditorState.push(
+        editorState, 
+        content.mergeEntityData(entityKey, {'src':resJson['path']}),
+        'apply-entity'
+      )
+      setEditorState(newState)
+    } catch(err) {
+      alert('上传失败')
+      console.log(err)
+    }
+  }
+
 
   const handleClickAway = () => {
     console.log('clear selection')
@@ -444,9 +476,20 @@ function App(props) {
                     <IconButton onClick={handleSet2Block}>
                       <ChangeCircleOutlinedIcon fontSize="small" />
                     </IconButton>
-                    <IconButton onClick={()=>handleEditEntity('img')}>
+                    <ButtonBase 
+                      sx={{padding:'7px',color:'white','&:hover':{bgcolor:'rgba(255,255,255,0.2)'}}} 
+                      component="label" 
+                      htmlFor="id_reupload_inline_img">
                       <UploadIcon fontSize="small" />
-                    </IconButton>
+                    </ButtonBase>
+                    <Box 
+                      onChange={handleUpload}
+                      component="input" 
+                      type="file" 
+                      sx={{display:'none'}} 
+                      accept="image/*" 
+                      id="id_reupload_inline_img"
+                    />
                   </>
                 )}
                 {selectionType === "TEX" && (

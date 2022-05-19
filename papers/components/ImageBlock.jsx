@@ -2,10 +2,11 @@
  * ImageBlock
  * editing: check is editing.
  * TODO images list
+ * [*] resize
  * FIXME popperId
  */
 
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Cookies from 'js-cookie'
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
@@ -57,6 +58,18 @@ export default function ImageBlock(props) {
   const [readonly, setReadonly] = useState(true)
   const [form, setForm] = useState(props.data)
   const [anchorEl, setAnchorEl] = useState(null)
+  const [scaling, setScaling] = useState(false)
+  const [start, setStart] = useState(0)
+
+  const imgRef = useRef()
+  useEffect(() => {
+    if(imgRef.current && !props.data.width) {
+      const width = imgRef.current.clientWidth
+      setForm({...props.data, width:width})
+    }
+  }, [props.data])
+
+  const maxWidth = imgRef.current ? imgRef.current.closest('figure').clientWidth : -1
 
   const handleClick = (event) => {
     setReadonly(false)
@@ -64,16 +77,6 @@ export default function ImageBlock(props) {
     props.onStartEdit()
   }
 
-  //if(readonly) {
-  //  return (
-  //    <Box
-  //      onClick={handleClick}
-  //      component="img"
-  //      src={props.data.src}
-  //      alt=''
-  //    />
-  //  )
-  //}
   const handleUpload = async(event) => {
     const file = event.target.files[0]
     if (file.size > 1024 * 1024) {
@@ -115,20 +118,61 @@ export default function ImageBlock(props) {
     }
   }
 
+  const handleScaleStart = (event) => {
+    setScaling(true)
+    setStart(event.screenX)
+  }
+
+  const handleScaling = () => {
+    if(scaling && event.screenX) {
+      const width = event.screenX - start
+      let resWidth = width + form.width
+      if(resWidth > maxWidth) {
+        resWidth = maxWidth
+      } else if (resWidth <= 50) {
+        resWidth = 50
+      }
+      //setForm({...form, width:resWidth})
+      setStart(event.screenX)
+      const res = {...form, width:resWidth}
+      setForm(res)
+      //props.onCloseEdit(res)
+    }
+  }
+
   const popperId = 'image-popper'
   const popperOpen = !readonly
 
+  useEffect(() => {
+    const f = () => {
+      if(scaling === true) {
+        setStart(0)
+        setScaling(false)
+      }
+    }
+    document.addEventListener("mouseup", f)
+    return () => document.removeEventListener('mouseup', f)
+  }, [scaling])
+
   return (
     <ClickAwayListener onClickAway={handleSave}>
-      <Box>
-        <Box sx={{textAlign:form.alignment !== 'justify' ? form.alignment : undefined}}>
+      <Box sx={{textAlign:form.alignment !== 'justify' ? form.alignment : undefined}} onMouseMove={handleScaling}>
+        <Box sx={{display:'inline-block',position:'relative'}}>
           <Box
+            ref={imgRef}
             onClick={handleClick}
             component="img"
             src={form.src}
-            sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:form.alignment === 'justify' ? '100%' : undefined}]}
+            //sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:form.alignment === 'justify' ? '100%' : undefined}]}
+            sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:form.alignment === 'justify' ? '100%' : form.width}]}
             alt=''
           />
+          {!readonly && (
+
+            <Box 
+              onMouseDown={handleScaleStart}
+              sx={{cursor:'nwse-resize',position:'absolute',bottom:0,right:0,bgcolor:'primary.main',border:'2px solid white',borderRadius:99,transform:'translate(80%,30%)',zIndex:99,width:'14px',height:'14px'}} />
+          )}
         </Box>
         <Popper 
           id={popperId}

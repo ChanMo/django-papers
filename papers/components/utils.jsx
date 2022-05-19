@@ -52,10 +52,10 @@ function InlineImageBlock(props) {
     s.selectAllChildren(event.target.nextElementSibling)
   }
   return (
-    <span className="inline-entity">
+    <Box component="span" className="inline-entity img-entity" sx={{position:'relative',display:'inline-block',width:data.width || undefined}}>
       <Box component="img" src={data.src} sx={{display:'inline-block',maxHeight:200,verticalAlign:'middle'}} onClick={handleClick} />
       {props.children}
-    </span>
+    </Box>
   )
 }
 function TeXBlockWrap(props) {

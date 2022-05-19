@@ -161,21 +161,21 @@ export default function PaperHeader(props) {
           <IconButton 
             size="small"
             onClick={() => onChange(EditorState.undo(editorState))}>
-            <UndoIcon />
+            <UndoIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="重做">
           <IconButton 
             size="small"
             onClick={() => onChange(EditorState.redo(editorState))}>
-            <RedoIcon />
+            <RedoIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="打印">
           <IconButton 
             size="small"
             onClick={()=>window.print()}>
-            <PrintIcon />
+            <PrintIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
@@ -184,7 +184,7 @@ export default function PaperHeader(props) {
             size="small"
             color={blockType === 'header-one' ? 'primary' : undefined}
             onClick={() => onToggleBlockStyle('header-one')}
-            sx={{ fontSize: 18, fontWeight: 'bold' }}>
+            sx={{ fontSize: 16, fontWeight: 'bold' }}>
             H1
           </IconButton>
         </Tooltip>
@@ -193,7 +193,7 @@ export default function PaperHeader(props) {
             size="small"
             color={blockType === 'header-two' ? 'primary' : undefined}
             onClick={() => onToggleBlockStyle('header-two')}
-            sx={{ fontSize: 18, fontWeight: 'bold' }}>
+            sx={{ fontSize: 16, fontWeight: 'bold' }}>
             H2
           </IconButton>
         </Tooltip>
@@ -201,7 +201,7 @@ export default function PaperHeader(props) {
           size="small"
           color={blockType === 'header-three' ? 'primary' : undefined}
           onClick={() => onToggleBlockStyle('header-three')}
-          sx={{ fontSize: 18, fontWeight: 'bold' }}>
+          sx={{ fontSize: 16, fontWeight: 'bold' }}>
           H3
         </IconButton>
         <Divider orientation="vertical" flexItem />
@@ -210,7 +210,7 @@ export default function PaperHeader(props) {
             size="small"
             color={inlineStyle.has('BOLD') ? 'primary' : undefined}
             onClick={() => handleToggleStyle('BOLD')}>
-            <FormatBoldIcon />
+            <FormatBoldIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="斜体(Ctrl+i)">
@@ -218,7 +218,7 @@ export default function PaperHeader(props) {
             size="small"
             color={inlineStyle.has('ITALIC') ? 'primary' : undefined}
             onClick={() => handleToggleStyle('ITALIC')}>
-            <FormatItalicIcon />
+            <FormatItalicIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="下划线">
@@ -226,52 +226,52 @@ export default function PaperHeader(props) {
             size="small"
             color={inlineStyle.has('UNDERLINE') ? 'primary' : undefined}
             onClick={() => handleToggleStyle('UNDERLINE')}>
-            <FormatUnderlinedIcon />
+            <FormatUnderlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="高亮文本">
           <IconButton
             size="small">
-            <HighlightIcon />
+            <HighlightIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
         <Tooltip title="左对齐">
           <IconButton size="small">
-            <FormatAlignLeftIcon />
+            <FormatAlignLeftIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="居中对齐">
           <IconButton size="small">
-            <FormatAlignCenterIcon />
+            <FormatAlignCenterIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="右对齐">
           <IconButton size="small">
-            <FormatAlignRightIcon />
+            <FormatAlignRightIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
         <Tooltip title="符号列表">
           <IconButton size="small">
-            <FormatListBulletedIcon />
+            <FormatListBulletedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="编号列表">
           <IconButton size="small">
-            <FormatListNumberedIcon />
+            <FormatListNumberedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
         <Tooltip title="插入表情">
           <IconButton size="small">
-            <InsertEmoticonIcon />
+            <InsertEmoticonIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="插入图片">
           <div>
             <IconButton size="small" component="label" htmlFor="id_insert_img">
-              <ImageIcon />
+              <ImageIcon fontSize="small" />
             </IconButton>
             <Box 
               onChange={handleInsertImage}
@@ -284,18 +284,18 @@ export default function PaperHeader(props) {
         </Tooltip>
         <Tooltip title="插入表格">
           <IconButton size="small" onClick={handleInsertTable}>
-            <CalendarViewMonthIcon />
+            <CalendarViewMonthIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="插入公式">
           <IconButton size="small" onClick={()=>setOpen('tex')}>
-            <FunctionsIcon />
+            <FunctionsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />
         <Tooltip title="快捷键">
           <IconButton size="small">
-            <KeyboardIcon />
+            <KeyboardIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Toolbar>
