@@ -52,8 +52,8 @@ function InlineImageBlock(props) {
     s.selectAllChildren(event.target.nextElementSibling)
   }
   return (
-    <Box component="span" className="inline-entity img-entity" sx={{position:'relative',display:'inline-block',width:data.width || undefined}}>
-      <Box component="img" src={data.src} sx={{display:'inline-block',maxHeight:200,verticalAlign:'middle'}} onClick={handleClick} />
+    <Box component="span" className="inline-entity img-entity" sx={{position:'relative',display:'inline-block'}}>
+      <Box component="img" src={data.src} sx={{display:'inline-block',maxHeight:200,verticalAlign:'middle',width:data.width || undefined}} onClick={handleClick} />
       {props.children}
     </Box>
   )
@@ -128,6 +128,10 @@ export function customBlockStyleFn(contentBlock) {
     return 'h2'
   } else if (type === 'header-three') {
     return 'h3'
+  } else if (type === 'header-four') {
+    return 'h4'
+  } else if (type === 'header-five') {
+    return 'h5'
   } else if (type === 'ALIGNCENTER') {
     return 'text-center'
   } else {

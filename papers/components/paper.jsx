@@ -4,6 +4,7 @@ import { Modifier, SelectionState, Editor, EditorState, RichUtils, convertToRaw,
 import 'draft-js/dist/Draft.css'
 import './app.css'
 
+import Typography from '@mui/material/Typography'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Stack from '@mui/material/Stack'
 import ButtonBase from '@mui/material/ButtonBase'
@@ -27,11 +28,19 @@ import HighlightIcon from '@mui/icons-material/Highlight';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 
-
 import Header from './Header'
 import TeXDialog from './TeXDialog'
 
 import { inline2Block, block2Inline, CustomBlock, customBlockStyleFn, decorator } from './utils'
+
+const BLOCK_TYPES = {
+  'header-one': 'H1',
+  'header-two': 'H2',
+  'header-three': 'H3',
+  'header-four': 'H4',
+  'header-five': 'H5',
+  'unstyled': '',
+}
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   '& .MuiToggleButtonGroup-grouped': {
@@ -446,11 +455,17 @@ function App(props) {
   const activeEntity = entityKey ? editorState.getCurrentContent().getEntity(entityKey) : null
   const selectionType = activeEntity ? activeEntity.getType() : 'PARAGRAPH'
 
+  const selection = editorState.getSelection()
+  const blockKey = selection.getStartKey()
+  const block = editorState.getCurrentContent().getBlockForKey(blockKey)
+  const wselection = window.getSelection()
+  const blockAnchorEl = wselection.anchorNode ? wselection.anchorNode.parentNode.closest('[data-block]') : null
+
   const handleScaling = () => {
     if(scaling && event.screenX) {
       const data = activeEntity.getData()
       const width = event.screenX - start
-      let resWidth = width + data.width
+      let resWidth = width + data.width || anchorEl.clientWidth
       if(resWidth > maxWidth) {
         resWidth = maxWidth
       } else if (resWidth <= 50) {
@@ -506,7 +521,7 @@ function App(props) {
           id='resize-trigger' 
           open={true}
           anchorEl={anchorEl}
-          onClose={handleClickAway}
+          //onClose={handleClickAway}
           sx={{zIndex:9999}}
           placement='bottom-end'
         >
@@ -517,8 +532,22 @@ function App(props) {
         </Popper>
       )}
 
-      {popoverOpen && (
+      {!readonly && blockAnchorEl && (
+        <Popper 
+          id='block-type' 
+          open={true}
+          anchorEl={blockAnchorEl}
+          sx={{zIndex:9999}}
+          placement='left'
+        >
+          <Typography 
+            color="textSecondary"
+            sx={{mr:2}}
+          >{BLOCK_TYPES[block.getType()]}</Typography>
+        </Popper>
+      )}
 
+      {popoverOpen && (
         <Popover 
           id={popoverId}
           open={popoverOpen}

@@ -1,31 +1,41 @@
-/**
-::selection {
-  background: orange;
+:root {
+  --title-color: #363636;
 }
-
-.is-active {
-  background: orange;
+@media print {
+  [role='tooltip'] {
+    display: none;
+  }
 }
-*/
-.DraftEditor-root .is-active {
-  outline: 2px solid;
-  outline-color: #1976d2;
-  /*border-radius: 2px */
+.h1 {
+  font-size: 2rem;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
 }
-
-/*
-.DraftEditor-root .img-entity.is-active:after {
-  cursor: pointer;
-  display: inline-block;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(50%, 50%);
-  content: '';
-  background: #1976d2;
-  width: 14px;
-  height: 14px;
-  border-radius: 99px;
-  border: 2px solid white;
+.h2 {
+  font-size: 1.5rem;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
 }
-*/
+.h3 {
+  font-size: 1.25rem;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.h4 {
+  font-size: 1rem;
+  color: var(--title-color);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.unstyled {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.text-center {
+  text-align: center;
+}.DraftEditor-root .is-active {
+  outline: 3px solid #1976d2;
+}

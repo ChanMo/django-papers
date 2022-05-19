@@ -154,6 +154,12 @@ export default function ImageBlock(props) {
     return () => document.removeEventListener('mouseup', f)
   }, [scaling])
 
+  let width
+  if(form.alignment === 'justify') {
+    width = '100%'
+  } else if (form.width) {
+    width = form.width
+  }
   return (
     <ClickAwayListener onClickAway={handleSave}>
       <Box sx={{textAlign:form.alignment !== 'justify' ? form.alignment : undefined}} onMouseMove={handleScaling}>
@@ -164,7 +170,7 @@ export default function ImageBlock(props) {
             component="img"
             src={form.src}
             //sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:form.alignment === 'justify' ? '100%' : undefined}]}
-            sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:form.alignment === 'justify' ? '100%' : form.width}]}
+            sx={[readonly ? {} : {outline:'4px solid',outlineColor:'#1976d2',borderRadius:1},{maxWidth:'100%',width:width}]}
             alt=''
           />
           {!readonly && (
