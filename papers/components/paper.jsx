@@ -10,6 +10,7 @@ import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Popper from '@mui/material/Popper'
 import Popover from '@mui/material/Popover'
 import Container from '@mui/material/Container'
 import Grid from '@mui/material/Grid'
@@ -67,12 +68,37 @@ function App(props) {
   const [editorState, setEditorState] = useState(EditorState.createEmpty(decorator))
   const [readonly, setReadonly] = useState(false)
 
+  // image resize 
+  const [scaling, setScaling] = useState(false)
+  const [start, setStart] = useState(0)
+
+
   const editorRef = useRef(null)
 
   // auto focus
   useEffect(() => {
     editorRef && editorRef.current && editorRef.current.focus()
   }, [])
+
+  useEffect(() => {
+    const f = () => {
+      if(scaling === true) {
+        setStart(0)
+        setScaling(false)
+      }
+    }
+    document.addEventListener("mouseup", f)
+    return () => document.removeEventListener('mouseup', f)
+  }, [scaling])
+
+
+  const handleScaleStart = (event) => {
+    setScaling(true)
+    setStart(event.screenX)
+  }
+
+  const maxWidth = editorRef.current ? editorRef.current.clientWidth : 0
+
 
   useEffect(() => {
     const fetchData = async() => {
@@ -420,8 +446,32 @@ function App(props) {
   const activeEntity = entityKey ? editorState.getCurrentContent().getEntity(entityKey) : null
   const selectionType = activeEntity ? activeEntity.getType() : 'PARAGRAPH'
 
+  const handleScaling = () => {
+    if(scaling && event.screenX) {
+      const data = activeEntity.getData()
+      const width = event.screenX - start
+      let resWidth = width + data.width
+      if(resWidth > maxWidth) {
+        resWidth = maxWidth
+      } else if (resWidth <= 50) {
+        resWidth = 50
+      }
+      setStart(event.screenX)
+      const content = editorState.getCurrentContent()
+      const newState = EditorState.push(
+        editorState, 
+        content.mergeEntityData(entityKey, {'width':resWidth}),
+        'apply-entity'
+      )
+      setEditorState(newState)
+
+      //const res = {...form, width:resWidth}
+      //setForm(res)
+    }
+  }
+
   return (
-    <Box>
+    <Box onMouseMove={handleScaling}>
       <Header
         data={data}
         editorState={editorState}
@@ -451,6 +501,22 @@ function App(props) {
         </Paper>
       </Container>
       {/*</ClickAwayListener>*/}
+      {entityKey && selectionType === "IMG" && (
+        <Popper
+          id='resize-trigger' 
+          open={true}
+          anchorEl={anchorEl}
+          onClose={handleClickAway}
+          sx={{zIndex:9999}}
+          placement='bottom-end'
+        >
+          <Box 
+            onMouseDown={handleScaleStart}
+            sx={{cursor:'nwse-resize',bgcolor:'primary.main',border:'2px solid white',borderRadius:99,zIndex:99,width:'14px',height:'14px',transform:'translate(50%,-50%)'}}
+          />
+        </Popper>
+      )}
+
       {popoverOpen && (
 
         <Popover 
