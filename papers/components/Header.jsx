@@ -14,6 +14,8 @@ import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
 import Avatar from '@mui/material/Avatar'
 
+import SuperscriptIcon from '@mui/icons-material/Superscript';
+import SubscriptIcon from '@mui/icons-material/Subscript';
 import HighlightIcon from '@mui/icons-material/Highlight';
 import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
@@ -233,6 +235,22 @@ export default function PaperHeader(props) {
           <IconButton
             size="small">
             <HighlightIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="上标">
+          <IconButton
+            size="small"
+            color={inlineStyle.has('SUPERSCRIPT') ? 'primary' : undefined}
+            onClick={() => handleToggleStyle('SUPERSCRIPT')}>
+            <SuperscriptIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="下标">
+          <IconButton
+            size="small"
+            color={inlineStyle.has('SUBSCRIPT') ? 'primary' : undefined}
+            onClick={() => handleToggleStyle('SUBSCRIPT')}>
+            <SubscriptIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Divider orientation="vertical" flexItem />

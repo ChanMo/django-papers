@@ -4,6 +4,7 @@ import { Modifier, SelectionState, Editor, EditorState, RichUtils, convertToRaw,
 import 'draft-js/dist/Draft.css'
 import './app.css'
 
+//import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Stack from '@mui/material/Stack'
@@ -27,6 +28,8 @@ import FormatBoldIcon from '@mui/icons-material/FormatBold';
 import HighlightIcon from '@mui/icons-material/Highlight';
 import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
+import SuperscriptIcon from '@mui/icons-material/Superscript';
+import SubscriptIcon from '@mui/icons-material/Subscript';
 
 import Header from './Header'
 import TeXDialog from './TeXDialog'
@@ -40,6 +43,22 @@ const BLOCK_TYPES = {
   'header-four': 'H4',
   'header-five': 'H5',
   'unstyled': '',
+}
+
+const styleMap = {
+  'SUPERSCRIPT': {
+    verticalAlign: 'super',
+    fontSize: 12,
+    position: 'relative',
+    top: '-0.25rem'
+  },
+  'SUBSCRIPT': {
+    verticalAlign: 'sub',
+    fontSize: 12,
+    position: 'relative',
+    bottom: '-0.25rem'
+  }
+
 }
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -355,6 +374,7 @@ function App(props) {
 
   // handle popover inline
   const handleToggleStyle2 = (value) => {
+    // FIXME superscript, subscript conflict
     const res = RichUtils.toggleInlineStyle(editorState, value)
     const selection = editorState.getSelection()
     const emptySelection = selection.set('focusOffset', selection.anchorOffset)
@@ -507,6 +527,7 @@ function App(props) {
             readOnly={readonly}
             placeholder="Write something."
             ref={editorRef}
+            customStyleMap={styleMap}
             blockStyleFn={customBlockStyleFn}
             blockRendererFn={_customBlockRenderer}
             editorState={editorState}
@@ -608,6 +629,18 @@ function App(props) {
                       sx={{bgcolor:inlineStyle.includes('UNDERLINE') ? 'rgba(255,255,255,0.2)':undefined}}
                       onClick={()=>handleToggleStyle2('UNDERLINE')}>
                       <FormatUnderlinedIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      sx={{bgcolor:inlineStyle.has('SUPERSCRIPT') ? 'rgba(255,255,255,0.2)' : undefined}}
+                      onClick={() => handleToggleStyle2('SUPERSCRIPT')}>
+                      <SuperscriptIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      sx={{bgcolor:inlineStyle.has('SUBSCRIPT') ? 'rgba(255,255,255,0.2)' : undefined}}
+                      onClick={() => handleToggleStyle2('SUBSCRIPT')}>
+                      <SubscriptIcon fontSize="small" />
                     </IconButton>
                   </>
                 )}
