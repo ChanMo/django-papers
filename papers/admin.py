@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.shortcuts import get_object_or_404, render
 from django.utils.html import format_html
 from django.urls import path
+from django.http import FileResponse
+from .utils import draft_to_docx
 from .models import Paper
 
 
@@ -19,7 +21,8 @@ class PaperAdmin(admin.ModelAdmin):
     @admin.display(description='操作')
     def extra_actions(self, obj):
         return format_html(
-            '<a href="{0}/edit/">编辑</a>',
+            '<a href="{0}/edit/">编辑</a>, '
+            '<a href="{0}/export">导出</a>',
             obj.pk
         )
 
@@ -27,6 +30,7 @@ class PaperAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         my_urls = [
             path('<int:pk>/edit/', self.edit_view),
+            path('<int:pk>/export/', self.export_view),
         ]
         return my_urls + urls
 
@@ -40,3 +44,8 @@ class PaperAdmin(admin.ModelAdmin):
             }
         }
         return render(request, 'admin/papers/paper/edit.html', context)
+
+    def export_view(self, request, pk):
+        obj = get_object_or_404(Paper, pk=pk)
+        res = draft_to_docx(obj.data, obj.title)
+        return FileResponse(open(res, 'rb'))
